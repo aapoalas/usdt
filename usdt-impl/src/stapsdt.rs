@@ -193,6 +193,12 @@ fn compile_probe(
 ) -> TokenStream {
     let (unpacked_args, in_regs) = common::construct_probe_args(&probe.types);
     let probe_rec = emit_probe_record(&provider.name, &probe.name, Some(&probe.types));
+    let type_check_fn = common::construct_type_check(
+        &provider.name,
+        &probe.name,
+        &provider.use_statements,
+        &probe.types,
+    );
 
     let sema_name = format_ident!("__usdt_sema_{}_{}", provider.name, probe.name);
     let impl_block = quote! {
@@ -213,6 +219,7 @@ fn compile_probe(
 
             if is_enabled != 0 {
                 #unpacked_args
+                #type_check_fn
                 unsafe {
                     #[allow(named_asm_labels)] {
                         ::std::arch::asm!(
@@ -226,7 +233,7 @@ fn compile_probe(
             }
         }
     };
-    common::build_probe_macro(config, provider, &probe.name, &probe.types, impl_block)
+    common::build_probe_macro(config, &probe.name, &probe.types, impl_block)
 }
 
 pub fn register_probes() -> Result<(), crate::Error> {
