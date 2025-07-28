@@ -163,6 +163,11 @@ const POINTER: Integer = Integer {
     width: BitWidth::Pointer,
 };
 
+const UNIQUE_ID: Integer = Integer {
+    sign: Sign::Unsigned,
+    width: BitWidth::Bit64,
+};
+
 /// Convert a type and register index to its GNU Assembler operation as a
 /// String.
 fn native_data_type_to_asm_op(typ: &NativeDataType, reg_index: u8) -> String {
@@ -190,7 +195,7 @@ fn native_data_type_to_arg_size(typ: &NativeDataType) -> &'static str {
 fn data_type_to_asm_op(typ: &DataType, reg_index: u8) -> String {
     match typ {
         DataType::Native(ty) => native_data_type_to_asm_op(ty, reg_index),
-        DataType::UniqueId => String::from("8"),
+        DataType::UniqueId => integer_to_asm_op(&UNIQUE_ID, reg_index).into(),
         DataType::Serializable(_) => integer_to_asm_op(&POINTER, reg_index).into(),
     }
 }
@@ -200,7 +205,7 @@ fn data_type_to_asm_op(typ: &DataType, reg_index: u8) -> String {
 fn data_type_to_arg_size(typ: &DataType) -> &'static str {
     match typ {
         DataType::Native(ty) => native_data_type_to_arg_size(ty),
-        DataType::UniqueId => "8",
+        DataType::UniqueId => integer_to_arg_size(&UNIQUE_ID),
         DataType::Serializable(_) => integer_to_arg_size(&POINTER),
     }
 }
