@@ -36,7 +36,7 @@ pub fn compile_provider_source(
     let dfile = dtrace_parser::File::try_from(source)?;
     let providers = dfile
         .providers()
-        .into_iter()
+        .iter()
         .map(|provider| {
             let provider = Provider::from(provider);
             // Ensure that the name of the module in the config is set, either by the caller or
