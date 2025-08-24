@@ -208,7 +208,7 @@ fn compile_probe(
                 is_active: u16
             }
 
-            extern {
+            extern "C" {
                 static #sema_name: UsdtSema;
             }
 
