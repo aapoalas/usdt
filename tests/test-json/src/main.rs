@@ -130,7 +130,7 @@ mod tests {
     }
 
     #[cfg(not(target_os = "linux"))]
-    mod unix {
+    mod dtrace {
         use super::*;
         use serde_json::Value;
         use std::process::Stdio;
@@ -213,7 +213,7 @@ mod tests {
     }
 
     #[cfg(target_os = "linux")]
-    mod linux {
+    mod stap {
         use super::*;
         use serde_json::Value;
         use std::process::Stdio;

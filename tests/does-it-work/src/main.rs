@@ -40,7 +40,7 @@ mod tests {
     use super::run_test;
 
     #[cfg(not(target_os = "linux"))]
-    mod unix {
+    mod dtrace {
         use super::run_test;
         use std::process::Stdio;
         use std::sync::mpsc::channel;
@@ -127,7 +127,7 @@ mod tests {
     }
 
     #[cfg(target_os = "linux")]
-    mod linux {
+    mod stap {
         use super::run_test;
         use std::process::Stdio;
         use std::sync::mpsc::channel;

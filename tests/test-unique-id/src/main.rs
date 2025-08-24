@@ -29,7 +29,7 @@ mod tests {
     use super::with_ids;
 
     #[cfg(not(target_os = "linux"))]
-    mod unix {
+    mod dtrace {
         use super::with_ids;
         use std::thread;
         use std::time::Duration;
@@ -116,7 +116,7 @@ mod tests {
     }
 
     #[cfg(target_os = "linux")]
-    mod linux {
+    mod stap {
         use super::with_ids;
         use std::thread;
         use std::time::Duration;
