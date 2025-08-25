@@ -146,7 +146,7 @@ mod tests {
                 .arg("bpftrace")
                 .arg("-q")
                 .arg("-e")
-                .arg(r#"usdt:*:with_ids:waypoint_from_thread { printf("%lu\n", arg0); exit(0); }"#)
+                .arg(r#"usdt:*:with_ids:waypoint_from_thread { printf("%lu\n", arg0); exit(); }"#)
                 .arg("-p")
                 .arg(std::process::id().to_string())
                 .stderr(subprocess::Redirection::Pipe)
