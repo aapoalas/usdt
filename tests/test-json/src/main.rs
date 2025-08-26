@@ -68,10 +68,10 @@ mod tests {
     use tokio::sync::mpsc::Receiver;
     use tokio::time::Instant;
 
-    // Maximum duration to wait for DTrace, controlling total test duration
+    // Maximum duration to wait for tracer subprocess, controlling total test duration
     const MAX_WAIT: Duration = Duration::from_secs(30);
 
-    // A sentinel printed by DTrace, so we know when it starts up successfully.
+    // A sentinel printed by tracer subprocess, so we know when it starts up successfully.
     const BEGIN_SENTINEL: &str = "BEGIN";
 
     // Fire the test probes in sequence, when a notification is received on the channel.
@@ -98,7 +98,7 @@ mod tests {
         println!("Test runner fired second probe");
     }
 
-    // Check trace subprocess stdout for the begin sentinel, telling us the program has spawned
+    // Check tracer subprocess stdout for the begin sentinel, telling us the program has spawned
     // successfully.
     async fn wait_for_begin_sentinel(trace: &mut Child, now: &Instant) {
         let mut output = String::new();
@@ -114,19 +114,19 @@ mod tests {
             });
             match read_task.await {
                 Ok(read_result) => {
-                    let chunk = read_result.expect("Failed to read DTrace stdout");
+                    let chunk = read_result.expect("Failed to read tracer stdout");
                     output.push_str(std::str::from_utf8(&chunk).expect("Non-UTF8 stdout"));
                     if output.contains(BEGIN_SENTINEL) {
-                        println!("DTrace started up successfully");
+                        println!("tracer started up successfully");
                         return;
                     }
                 }
                 _ => {}
             }
-            // println!("DTrace not yet ready");
+            println!("tracer not yet ready");
             continue;
         }
-        panic!("DTrace failed to startup within {:?}", MAX_WAIT);
+        panic!("tracer failed to startup within {:?}", MAX_WAIT);
     }
 
     #[cfg(not(target_os = "linux"))]
@@ -225,13 +225,17 @@ mod tests {
 
         // Run bpftrace as a subprocess, waiting for the JSON output of the provided probe.
         async fn run_bpftrace_and_return_json(tx: &Sender<()>, probe_name: &str) -> Value {
-            // Start the bpftrace subprocess, and don't exit if the probe doesn't exist.
+            // Start the bpftrace subprocess, and attach to this process using its PID.
             let mut bpftrace = Command::new(root_command())
                 .arg("bpftrace")
                 .arg("-e")
+                // Note: bpftrace does not support multiple -e (program)
+                // arguments, so both the test probe and the BEGIN probe are
+                // given in the same program.
                 // First the test probe we're interested in listening for.
-                // After that, a "BEGIN" output printed by bpftrace when it starts, to coordinate
-                // with the test thread firing the probe itself.
+                // After that, a "BEGIN" output printed by bpftrace when it
+                // starts, to coordinate with the test thread firing the probe
+                // itself.
                 .arg(format!(
                     "usdt:*:test_json:{} {{ printf(\"%s\\n\", str(arg0)); exit(); }}, BEGIN {{ printf(\"{}\\n\"); }}",
                     probe_name, BEGIN_SENTINEL
@@ -243,8 +247,8 @@ mod tests {
                 .spawn()
                 .expect("Failed to spawn bpftrace subprocess");
 
-            // Wait for DTrace to correctly start up before notifying the test thread to start
-            // firing probes.
+            // Wait for bpftrace to correctly start up before notifying the
+            // test thread to start firing probes.
             let now = Instant::now();
             wait_for_begin_sentinel(&mut bpftrace, &now).await;
 
