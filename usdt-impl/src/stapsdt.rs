@@ -214,7 +214,7 @@ fn compile_probe(
 
             let is_enabled: u16;
             unsafe {
-                is_enabled = ::core::ptr::addr_of!(#sema_name.is_active).read_volatile();
+                is_enabled = (&raw const #sema_name.is_active).read_volatile();
             }
 
             if is_enabled != 0 {

@@ -141,7 +141,7 @@ mod tests {
             with_ids::work_finished!(|| (&id, result));
             assert_eq!(result, id.as_u64());
 
-            // Actually verify that the same value is received by DTrace.
+            // Actually verify that the same value is received by bpftrace.
             let mut bpftrace = Exec::cmd(root_command())
                 .arg("bpftrace")
                 .arg("-q")
