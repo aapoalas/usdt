@@ -68,10 +68,10 @@ mod tests {
     use tokio::sync::mpsc::Receiver;
     use tokio::time::Instant;
 
-    // Maximum duration to wait for trace subprocess, controlling total test duration
+    // Maximum duration to wait for tracer subprocess, controlling total test duration
     const MAX_WAIT: Duration = Duration::from_secs(30);
 
-    // A sentinel printed by trace subprocess, so we know when it starts up successfully.
+    // A sentinel printed by tracer subprocess, so we know when it starts up successfully.
     const BEGIN_SENTINEL: &str = "BEGIN";
 
     // Fire the test probes in sequence, when a notification is received on the channel.
