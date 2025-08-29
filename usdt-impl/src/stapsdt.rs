@@ -136,6 +136,10 @@ fn emit_probe_record(prov: &str, probe: &str, types: Option<&[DataType]>) -> Str
             .collect::<Vec<_>>()
             .join(" ")
     });
+    // Note: we force the _.stapsdt.base section to be retained by linkers
+    // using the "R" flag in "aGR" flags string. This is done to handle linkers
+    // that do not consider `.8byte _.stapsdt.base` as usage for purposes of
+    // section garbage collection.
     format!(
         r#"
         // First define the semaphore
@@ -174,7 +178,7 @@ fn emit_probe_record(prov: &str, probe: &str, types: Option<&[DataType]>) -> Str
         // Finally define (if not defined yet) the base used to detect prelink
         // address adjustments.
             .ifndef _.stapsdt.base
-                    .pushsection .stapsdt.base, "aG", "progbits", .stapsdt.base, comdat
+                    .pushsection .stapsdt.base, "aGR", "progbits", .stapsdt.base, comdat
                     .weak _.stapsdt.base
                     .hidden _.stapsdt.base
             _.stapsdt.base:
