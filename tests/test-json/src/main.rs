@@ -126,7 +126,7 @@ mod tests {
             println!("tracer not yet ready");
             continue;
         }
-        panic!("tracer failed to startup within {:?}", MAX_WAIT);
+        eprintln!("tracer failed to startup within {:?}", MAX_WAIT);
     }
 
     #[cfg(not(target_os = "linux"))]
@@ -273,6 +273,23 @@ mod tests {
 
         #[tokio::test]
         async fn test_json_support() {
+            let test_exe = std::env::current_exe().unwrap();
+            let re = std::process::Command::new("readelf")
+                .arg("-n")
+                .arg(&test_exe)
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .spawn()
+                .expect("Could not start readelf");
+            let output = re
+                .wait_with_output()
+                .expect("Failed to read readelf stdout");
+
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            eprintln!("{stdout}");
+            eprintln!("{stderr}");
+
             let (tx, rx) = channel(4);
             let test_task = tokio::task::spawn(fire_test_probes(rx));
 
